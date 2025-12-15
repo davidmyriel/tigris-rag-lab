@@ -1,11 +1,9 @@
 """
 Populate a Tigris bucket called `wiki-dataset` with a small sample of Wikipedia articles.
 
-This script is intended to be run locally in your venv, not in a sandboxed environment.
-
 Usage:
   .venv/bin/pip install datasets
-  .venv/bin/python fill_wiki_dataset.py
+  .venv/bin/python wiki.py
 """
 
 from datasets import load_dataset
@@ -44,7 +42,6 @@ def main() -> None:
     bucket = "wiki-dataset"
 
     print("Loading a small English Wikipedia sample...")
-    # Use the modern config name; adjust date if needed
     ds = (
         load_dataset("wikimedia/wikipedia", "20231101.en", split="train")
         .shuffle(seed=42)

@@ -1,5 +1,7 @@
-# Tigris RAG Lab
+# Tigris RAG Lab for Chunking and Retrieval
 ![lab](img/lab.jpeg)
+
+## Test as many chunking strategies as your heart desires - all in parallel!
 
 This repo is a small lab for running RAG experiments without losing track of what changed.
 
@@ -56,7 +58,7 @@ That script:
 ## Files you’ll care about
 
 - `dataset.py` – optional helper to create buckets, snapshots, and forks in Tigris (e.g. `wiki-dataset` and its variants).  
-- `fill_wiki_dataset.py` – downloads a few Wikipedia articles and uploads them into `wiki-dataset/p_*/review.txt`.  
+- `wiki.py` – downloads a few Wikipedia articles and uploads them into `wiki-dataset/p_*/review.txt`.  
 - `ingest.py` – reads a manifest (`manifests/exp-*.json`) and builds a Qdrant collection from the corresponding bucket.  
 - `eval.py` – runs a few Wikipedia-style queries against `wiki-naive`, `wiki-semantic`, and `wiki-window`.  
 - `run_all.sh` – one-button script to rebuild all indexes and run eval.
