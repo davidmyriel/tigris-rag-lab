@@ -3,9 +3,7 @@
 
 ## Which embedding or chunking strategy is the best?
 
-This repo is a small lab for running RAG experiments.
-
-The problem it’s solving is boring but real: you tweak chunking or swap an embedding model, results change, and a week later nobody can say *why*, or recreate the run that looked best.
+This repo is a small lab for running RAG experiments. As you tweak chunking or swap an embedding model, results change, and a week later nobody can say *why*, or recreate the run that looked best.
 
 The approach here is:
 
@@ -15,7 +13,7 @@ The approach here is:
 
 ## How it works
 
-Start with a “base” dataset bucket in Tigris. When you want to try a new idea—different chunking, slightly different cleaning, an extra subset of docs—you don’t copy the whole dataset. You create a **fork** of the bucket. That fork is your dataset “branch.”
+Start with a “base” dataset bucket in Tigris. When you want to try a new idea, such as different chunking, slightly different cleaning, an extra subset of docs, then you don’t copy the whole dataset. Instead, you create a **fork** of the bucket. That fork is your dataset “branch.”
 
 Then you build a Qdrant collection from that fork. The code reads a manifest file (a small JSON “recipe”) that says where the data is and how to process it: which text field to embed, what chunking strategy to use, and which embedding model to call.
 
@@ -23,9 +21,7 @@ At the end you run `eval.py`, which runs a few test queries and prints a simple 
 
 ## Why there’s a manifest
 
-The manifest exists so the experiment is reproducible. It’s not meant to be fancy—just a way to record what you did.
-
-If you don’t write this down somewhere, you’ll eventually end up with collections named `test2-final-final` and no memory of what differs between them. The manifest keeps the “what did we index, and how?” part explicit.
+The manifest exists so the experiment is reproducible. It's simply a way to record what you did. The manifest keeps the “what did we index, and how?” part explicit.
 
 ## Running the lab (Wikipedia)
 
