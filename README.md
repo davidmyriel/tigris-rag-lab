@@ -1,5 +1,7 @@
 ## Tigris RAG Lab
 
+![lab](lab.png)
+
 This repo is a small, self‑contained **RAG experimentation lab**.
 
 It shows how to:
