@@ -3,22 +3,22 @@ Unified CLI for managing Tigris buckets, snapshots and forks for this project.
 
 Examples:
   # 1) Create base bucket with snapshots enabled
-  .venv/bin/python dataset.py create-bucket --bucket product-dataset
+  .venv/bin/python dataset.py create-bucket --bucket wiki-dataset
 
   # 2) Create a named snapshot for the base bucket
   .venv/bin/python dataset.py create-snapshot \\
-      --bucket product-dataset \\
-      --name heading-chunking
+      --bucket wiki-dataset \\
+      --name wiki-base
 
   # 3) Create a single fork from a known snapshot version
   .venv/bin/python dataset.py create-fork \\
-      --source-bucket product-dataset \\
-      --snapshot-version 1765295338432283625 \\
-      --fork-bucket product-dataset-heading
+      --source-bucket wiki-dataset \\
+      --snapshot-version <version> \\
+      --fork-bucket wiki-dataset-exp
 
-  # 4) Create snapshots + forks for naive & semantic strategies
+  # 4) (Optional) Create snapshots + forks for multiple wiki strategies
   .venv/bin/python dataset.py create-forks-all \\
-      --source-bucket product-dataset
+      --source-bucket wiki-dataset
 """
 
 import argparse

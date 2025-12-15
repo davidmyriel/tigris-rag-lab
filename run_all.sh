@@ -15,26 +15,22 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-echo "==> Ensuring forks exist (may print BucketAlreadyExists errors)..."
-.venv/bin/python dataset.py create-forks-all --source-bucket product-dataset || true
+echo "==> Ingesting: wiki-naive"
+.venv/bin/python ingest.py \
+  --bucket wiki-dataset-naive \
+  --manifest-key manifests/exp-wiki-naive-v1.json
 
 echo
-echo "==> Ingesting: products-naive"
+echo "==> Ingesting: wiki-semantic"
 .venv/bin/python ingest.py \
-  --bucket product-dataset-naive \
-  --manifest-key manifests/exp-naive-v1.json
+  --bucket wiki-dataset-semantic \
+  --manifest-key manifests/exp-wiki-semantic-v1.json
 
 echo
-echo "==> Ingesting: products-heading"
+echo "==> Ingesting: wiki-window"
 .venv/bin/python ingest.py \
-  --bucket product-dataset-heading \
-  --manifest-key manifests/exp-heading-v1.json
-
-echo
-echo "==> Ingesting: products-semantic"
-.venv/bin/python ingest.py \
-  --bucket product-dataset-semantic \
-  --manifest-key manifests/exp-semantic-v1.json
+  --bucket wiki-dataset-window \
+  --manifest-key manifests/exp-wiki-window-v1.json
 
 echo
 echo "==> Running eval"

@@ -1,135 +1,106 @@
-## Tigris RAG Lab
+# Tigris RAG Lab
+![lab](img/lab.jpeg)
 
-![lab](lab.png)
+This repo is a small lab for running RAG experiments without losing track of what changed.
 
-This repo is a small, self‑contained **RAG experimentation lab**.
+The problem it’s solving is boring but real: you tweak chunking or swap an embedding model, results change, and a week later nobody can say *why*—or recreate the run that looked best.
 
-It shows how to:
-- keep a text dataset in **Tigris** with **snapshots and forks** (so you can branch your data like git), and  
-- build **multiple Qdrant indexes** over those forks, each with different preprocessing / chunking, and  
-- run a **repeatable evaluation** to compare those indexes side by side.
+The approach here is:
 
-### Who this is for
+- Use **Tigris** to version your dataset like code.
+- Use **Qdrant** to build a separate index for each experiment.
+- Use a small eval script to compare runs.
 
-- People building **RAG systems** who want more discipline around:
-  - dataset versioning,
-  - trying different chunking strategies,
-  - swapping embedding configs,
-  - and being able to reproduce “that good run from last week”.
-- Anyone who already has Qdrant + S3‑compatible storage and wants a **minimal pattern** for:
-  - “dataset branch” → “index build” → “eval” as one clean loop.
+## How it works
 
-### What this lab demonstrates
+Start with a “base” dataset bucket in Tigris. When you want to try a new idea—different chunking, slightly different cleaning, an extra subset of docs—you don’t copy the whole dataset. You create a **fork** of the bucket. That fork is your dataset “branch.”
 
-- **Tigris as a branching filesystem for datasets**
-  - Base bucket: `product-dataset` with a handful of `p_i/review.txt` documents.  
-  - Fork buckets: `product-dataset-naive`, `product-dataset-heading`, `product-dataset-semantic`, created from snapshots.
-  - Each fork can have its own **manifest** describing how to turn that data into an index.
+Then you build a Qdrant collection from that fork. The code reads a manifest file (a small JSON “recipe”) that says where the data is and how to process it: which text field to embed, what chunking strategy to use, and which embedding model to call.
 
-- **Qdrant as a branching index**
-  - For each fork + manifest, `ingest.py` builds a separate Qdrant collection:
-    - `products-naive` – one vector per review.  
-    - `products-heading` – alternative strategy (still one per review here).  
-    - `products-semantic` – paragraph‑level chunks per review.
-  - All points carry payload linking them back to:
-    - dataset bucket + snapshot,  
-    - manifest + hash,  
-    - chunker + embedding model.
+At the end you run `eval.py`, which runs a few test queries and prints a simple score so you can compare approaches.
 
-- **A tiny, code‑level eval loop**
-  - `eval.py` runs a few hard‑coded queries and prints Hit@5 for each collection.  
-  - You can extend this into a proper eval harness (more queries, labels, metrics) without changing the control flow.
+## Why there’s a manifest
 
-The goal is not to be “complete”, but to give you a **clear, working skeleton** you can adapt to your own datasets, chunkers, and embedding models.
+The manifest exists so the experiment is reproducible. It’s not meant to be fancy—just a way to record what you did.
 
-### 1. Install
+If you don’t write this down somewhere, you’ll eventually end up with collections named `test2-final-final` and no memory of what differs between them. The manifest keeps the “what did we index, and how?” part explicit.
 
-```bash
-cd /Users/errant/qdrant-ingestion
+## Running the lab (Wikipedia)
 
-python3 -m venv .venv
-.venv/bin/pip install --upgrade pip
-.venv/bin/pip install boto3 python-dotenv qdrant-client fastembed tigris-boto3-ext
-```
+In this repo, the dataset is a small slice of **English Wikipedia** stored in a Tigris bucket called `wiki-dataset`:
 
-Create `.env`:
+- `wiki-dataset/p_1/review.txt` … `wiki-dataset/p_10/review.txt`
+
+![lab](img/tigris.png)
+
+Each file is a single article (title + body). From that, the lab builds **three** Qdrant collections:
+
+- `wiki-naive` – one vector per article (no chunking)  
+- `wiki-semantic` – paragraph-level chunks  
+- `wiki-window` – sliding-window chunks
+
+![lab](img/qdrant.png)
+
+Create a virtualenv, install dependencies, and set environment variables for Tigris and Qdrant. Then run:
 
 ```bash
-ACCESS_KEY=...
-SECRET_ACCESS_KEY=...
-S3_ENDPOINT=https://t3.storage.dev
-QDRANT_URL=...
-QDRANT_KEY=...
-```
-
-### 2. One-command run
-
-```bash
-chmod +x run_all.sh      # first time only
+chmod +x run_all.sh
 ./run_all.sh
 ```
 
-This will:
-- ensure Tigris forks exist (`dataset.py create-forks-all`)
-- build three Qdrant collections from manifests (`ingest.py`)
-- run a small eval over all three (`eval.py`)
+That script:
 
-### 3. Quick query example
+1. Builds `wiki-naive`, `wiki-semantic`, and `wiki-window` from `wiki-dataset` using their manifests.  
+2. Runs `eval.py`, which queries all three and prints the top hits so you can compare how each chunking strategy behaves.
 
-```python
-from qdrant_client import QdrantClient, models
-from dotenv import load_dotenv
-import os
+## Files you’ll care about
 
-load_dotenv()
+- `dataset.py` – optional helper to create buckets, snapshots, and forks in Tigris (e.g. `wiki-dataset` and its variants).  
+- `fill_wiki_dataset.py` – downloads a few Wikipedia articles and uploads them into `wiki-dataset/p_*/review.txt`.  
+- `ingest.py` – reads a manifest (`manifests/exp-*.json`) and builds a Qdrant collection from the corresponding bucket.  
+- `eval.py` – runs a few Wikipedia-style queries against `wiki-naive`, `wiki-semantic`, and `wiki-window`.  
+- `run_all.sh` – one-button script to rebuild all indexes and run eval.
 
-client = QdrantClient(
-    url=os.getenv("QDRANT_URL"),
-    api_key=os.getenv("QDRANT_KEY"),
-)
+## Sample eval output
 
-res = client.query_points(
-    collection_name="products-naive",
-    query=models.Document(
-        text="Phones with improved design",
-        model="sentence-transformers/all-MiniLM-L6-v2",
-    ),
-    using="text_embedding",
-    limit=3,
-)
+When you run:
 
-for p in res.points:
-    print(p.id, p.score, p.payload.get("folder"))
+```bash
+./run_all.sh
 ```
 
-### 4. Files in this repo (what they do)
+You’ll see output like:
 
-- `dataset.py`  
-  - CLI to manage **Tigris** buckets, snapshots, and forks.  
-  - Subcommands:
-    - `create-bucket` – create `product-dataset` with snapshots enabled.  
-    - `create-snapshot` – create a named snapshot for `product-dataset`.  
-    - `create-fork` – create a fork bucket from a specific snapshot version.  
-    - `create-forks-all` – create snapshots + forks for `product-dataset-naive` and `product-dataset-semantic`.
+```text
+=== Evaluating wiki-naive (wiki) ===
 
-- `ingest.py`  
-  - Reads a **manifest JSON** from a Tigris bucket (under `manifests/exp-*.json`).  
-  - Creates a **Qdrant collection** with named vector `text_embedding`.  
-  - Ingests documents from the chosen fork bucket, using either:
-    - full-doc mode (`chunker: "none"`) or  
-    - paragraph-chunk mode (`chunker: "paragraph"`).  
-  - Attaches payload fields so every point is traceable back to dataset + manifest.
+Query: history of the Roman Empire
+Top-5 source keys:
+  score=0.1088  source_key=p_4/review.txt
+  score=0.0814  source_key=p_10/review.txt
+  score=0.0444  source_key=p_2/review.txt
+  score=0.0221  source_key=p_7/review.txt
+  score=-0.0182  source_key=p_1/review.txt
 
-- `eval.py`  
-  - Runs a small Hit@5 evaluation against:
-    - `products-naive`  
-    - `products-heading`  
-    - `products-semantic`  
-  - Uses a few hard-coded queries and checks whether the expected `folder` appears in the top‑K results.
+=== Evaluating wiki-semantic (wiki) ===
 
-- `run_all.sh`  
-  - One-button pipeline:
-    1. Ensures forks exist via `dataset.py create-forks-all`.  
-    2. Builds all three Qdrant collections via `ingest.py`.  
-    3. Runs `eval.py` and prints scores.
+Query: history of the Roman Empire
+Top-5 source keys:
+  score=0.2068  source_key=p_7/review.txt
+  score=0.1994  source_key=p_5/review.txt
+  score=0.1994  source_key=p_8/review.txt
+  score=0.1994  source_key=p_1/review.txt
+  score=0.1994  source_key=p_3/review.txt
 
+=== Evaluating wiki-window (wiki) ===
+
+Query: history of the Roman Empire
+Top-5 source keys:
+  score=0.2317  source_key=p_5/review.txt
+  score=0.1815  source_key=p_7/review.txt
+  score=0.1768  source_key=p_7/review.txt
+  score=0.1502  source_key=p_7/review.txt
+  score=0.1134  source_key=p_3/review.txt
+```
+
+This lets you see, at a glance, how each chunking strategy (naive, paragraph, sliding window) behaves on the same query.

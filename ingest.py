@@ -224,6 +224,53 @@ def ingest_from_manifest(
                     )
                 )
                 point_id += 1
+        elif chunker == "window":
+            # Sliding-window chunking over raw text (character-based).
+            window_size = int(preprocess.get("window_size", 500))
+            stride = int(preprocess.get("window_stride", window_size // 2 or 1))
+
+            if window_size <= 0:
+                window_size = 500
+            if stride <= 0:
+                stride = window_size
+
+            text_len = len(text)
+            local_idx = 0
+            pos = 0
+            while pos < text_len:
+                chunk = text[pos : pos + window_size].strip()
+                if chunk:
+                    local_idx += 1
+                    payload = {
+                        "chunk_index": local_idx,
+                        "text": chunk,
+                        "folder": folder,
+                        "source_key": key,
+                        "dataset_bucket": dataset_bucket,
+                        "dataset_snapshot": dataset_snapshot,
+                        "manifest_key": manifest_key,
+                        "manifest_hash": manifest_hash,
+                        "chunker_version": chunker_version,
+                        "embed_model": embed_model,
+                        "window_size": window_size,
+                        "window_stride": stride,
+                    }
+
+                    all_points.append(
+                        models.PointStruct(
+                            id=point_id,
+                            vector={
+                                "text_embedding": models.Document(
+                                    text=chunk,
+                                    model=embed_model,
+                                )
+                            },
+                            payload=payload,
+                        )
+                    )
+                    point_id += 1
+
+                pos += stride
         else:
             # Naive / heading-style ingestion: one point per document.
             payload = {
