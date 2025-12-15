@@ -1,11 +1,11 @@
 # Tigris RAG Lab for Chunking and Retrieval
 ![lab](img/lab.jpeg)
 
-## Test as many chunking strategies as your heart desires - all in parallel!
+## Which embedding or chunking strategy is the best?
 
-This repo is a small lab for running RAG experiments without losing track of what changed.
+This repo is a small lab for running RAG experiments.
 
-The problem it’s solving is boring but real: you tweak chunking or swap an embedding model, results change, and a week later nobody can say *why*—or recreate the run that looked best.
+The problem it’s solving is boring but real: you tweak chunking or swap an embedding model, results change, and a week later nobody can say *why*, or recreate the run that looked best.
 
 The approach here is:
 
