@@ -395,8 +395,12 @@ def upload_file_to_tigris(file_content: bytes, file_name: str) -> tuple[str, str
 # ============================================================================
 
 def main():
-    st.title("🔬 Tigris RAG Lab")
-    st.markdown("**Autonomous chunking strategy optimization**")
+    # Header image
+    st.image("img/lab.png")
+    
+    # Intro text
+    st.markdown("**Upload your dataset and find the optimal chunking strategy for your doc.**")
+    st.markdown("**All experiments are versioned in Tigris, indexed in Qdrant, and evaluated by CrewAI agents to find the best-performing approach.**")
     
     if not CREWAI_AVAILABLE:
         st.error("⚠️ CrewAI not available. Run: pip install crewai crewai-tools")

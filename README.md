@@ -1,5 +1,5 @@
 # Tigris RAG Lab for Chunking and Retrieval
-![lab](img/lab.jpeg)
+![lab](img/lab.png)
 
 ## Which embedding or chunking strategy is the best?
 
