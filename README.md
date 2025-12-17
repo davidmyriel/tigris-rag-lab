@@ -36,7 +36,6 @@ Upload your dataset and find the optimal chunking strategy for your doc. Store a
 - `chunk.py` - Pre-chunk documents before ingestion
 - `ingest.py` - Build Qdrant collections from pre-chunked data
 - `eval.py` - Evaluate collections with document-grounded metrics
-- `run_all.sh` - Batch script to run all experiments
 
 ## How It Works
 

@@ -3,8 +3,8 @@ boto3>=1.34.0
 python-dotenv>=1.0.0
 qdrant-client>=1.7.0
 
-# Dataset loading (for wiki.py)
-datasets>=2.14.0
+# Optional: datasets library (if needed for data loading)
+# datasets>=2.14.0
 
 # Tigris-specific extensions
 tigris-boto3-ext>=0.1.0

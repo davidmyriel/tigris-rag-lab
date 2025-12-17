@@ -33,8 +33,19 @@ except ImportError:
 st.set_page_config(
     page_title="Tigris RAG Lab",
     page_icon="🔬",
-    layout="wide",
+    layout="centered",
 )
+
+# Custom CSS to match header image width (1256px)
+st.markdown("""
+    <style>
+    .main .block-container {
+        max-width: 1256px;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Available chunking strategies
 CHUNKING_STRATEGIES = {
