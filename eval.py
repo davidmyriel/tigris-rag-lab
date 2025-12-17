@@ -19,6 +19,9 @@ WIKI_EXPERIMENTS = [
   "wiki-naive",
   "wiki-semantic",
   "wiki-window",
+  "wiki-sentence",
+  "wiki-markdown",
+  "wiki-recursive",
 ]
 
 WIKI_QUERIES = [

@@ -15,6 +15,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+echo "==> Ensuring forks exist (may print BucketAlreadyExists errors)..."
+.venv/bin/python dataset.py create-forks-all --source-bucket wiki-dataset || true
+
+echo
 echo "==> Ingesting: wiki-naive"
 .venv/bin/python ingest.py \
   --bucket wiki-dataset-naive \
@@ -31,6 +35,24 @@ echo "==> Ingesting: wiki-window"
 .venv/bin/python ingest.py \
   --bucket wiki-dataset-window \
   --manifest-key manifests/exp-wiki-window-v1.json
+
+echo
+echo "==> Ingesting: wiki-sentence"
+.venv/bin/python ingest.py \
+  --bucket wiki-dataset-sentence \
+  --manifest-key manifests/exp-wiki-sentence-v1.json
+
+echo
+echo "==> Ingesting: wiki-markdown"
+.venv/bin/python ingest.py \
+  --bucket wiki-dataset-markdown \
+  --manifest-key manifests/exp-wiki-markdown-v1.json
+
+echo
+echo "==> Ingesting: wiki-recursive"
+.venv/bin/python ingest.py \
+  --bucket wiki-dataset-recursive \
+  --manifest-key manifests/exp-wiki-recursive-v1.json
 
 echo
 echo "==> Running eval"

@@ -132,17 +132,38 @@ def cmd_create_forks_all(args: argparse.Namespace) -> None:
     s3_client = make_s3_client()
     source = args.source_bucket
 
-    # Default strategies mirror the previous create-forks-all.py behavior.
+    # Strategies for wiki-dataset
+    base_name = source.replace("-dataset", "")
     strategies: List[Dict[str, str]] = [
         {
             "name": "naive",
             "snapshot_name": "naive-chunking",
-            "fork_bucket": "product-dataset-naive",
+            "fork_bucket": f"{base_name}-dataset-naive",
         },
         {
             "name": "semantic",
             "snapshot_name": "semantic-chunking",
-            "fork_bucket": "product-dataset-semantic",
+            "fork_bucket": f"{base_name}-dataset-semantic",
+        },
+        {
+            "name": "window",
+            "snapshot_name": "window-chunking",
+            "fork_bucket": f"{base_name}-dataset-window",
+        },
+        {
+            "name": "sentence",
+            "snapshot_name": "sentence-chunking",
+            "fork_bucket": f"{base_name}-dataset-sentence",
+        },
+        {
+            "name": "markdown",
+            "snapshot_name": "markdown-chunking",
+            "fork_bucket": f"{base_name}-dataset-markdown",
+        },
+        {
+            "name": "recursive",
+            "snapshot_name": "recursive-chunking",
+            "fork_bucket": f"{base_name}-dataset-recursive",
         },
     ]
 
@@ -188,10 +209,9 @@ def cmd_create_forks_all(args: argparse.Namespace) -> None:
             print(f"   ✗ Error creating fork: {e}")
 
     print("\n" + "=" * 60)
-    print("Summary (forks you may now use):")
-    print("  - product-dataset-heading (heading-aware, created separately)")
-    print("  - product-dataset-naive (naive chunking)")
-    print("  - product-dataset-semantic (semantic/paragraph chunking)")
+    print("Summary (forks created):")
+    for strat in strategies:
+        print(f"  - {strat['fork_bucket']} ({strat['name']} chunking)")
 
 
 def build_parser() -> argparse.ArgumentParser:
